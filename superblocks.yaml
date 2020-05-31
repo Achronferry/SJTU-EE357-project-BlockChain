@@ -10,9 +10,13 @@ jobs:
     script:
       - npm install truffle
       #- npx truffle test
+  hello:
+    image: node
+    script:
+      e echo Hello world !
 stages:
   - pipeline:
       jobs:
         - compile
         - test
-        - echo 'hello world!'
+        - hello
