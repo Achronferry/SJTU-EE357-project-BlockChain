@@ -4,14 +4,15 @@ jobs:
     image: node
     script:
       - npm install truffle
-      - npx truffle compile
+      #- npx truffle compile
   test:
     image: node
     script:
       - npm install truffle
-      - npx truffle test
+      #- npx truffle test
 stages:
   - pipeline:
       jobs:
         - compile
         - test
+        - echo 'hello world!'
