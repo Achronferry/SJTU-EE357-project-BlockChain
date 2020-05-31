@@ -13,7 +13,7 @@ jobs:
   hello:
     image: node
     script:
-      e echo Hello world !
+      - echo Hello world !
 stages:
   - pipeline:
       jobs:
