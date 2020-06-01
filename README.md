@@ -17,6 +17,15 @@ a)研究导向：智能合约是区块链最为吸引商业界广泛关注的一
 
 
 
+
+
+# Configuration
+
+- 18.04.2-Ubuntu x86_64 GNU/Linux 
+- node.js	v12.17.0 
+- npm	6.14.4 
+- truffle	v5.1.28
+
 # Issue
 
 ```bash
