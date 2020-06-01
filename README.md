@@ -14,3 +14,21 @@ a)研究导向：智能合约是区块链最为吸引商业界广泛关注的一
 智能合约的相关研究可参考 https://github.com/decrypto-org/blockchain-papers#general ；
 
 以太坊的使用请参考：https://ethereum.org/ ；
+
+
+
+# Issue
+
+```bash
+truffle init
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+✔ Preparing to download box
+✖ Downloading
+Unbox failed!
+✖ Downloading
+Unbox failed!
+RequestError: Error: connect ECONNREFUSED 0.0.0.0:443
+......
+```
+
+raw.githubusercontent.com 域名污染,see: https://bbs.huaweicloud.com/blogs/143682
