@@ -14,9 +14,16 @@ jobs:
     image: node
     script:
       - echo Hello world !
+  run:
+    image: node
+    script:
+      - truffle develop
+      - truffle migrate
+      - npm run dev
 stages:
   - pipeline:
       jobs:
         - compile
         - test
         - hello
+        - run

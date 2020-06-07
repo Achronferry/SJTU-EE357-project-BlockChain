@@ -8,7 +8,7 @@
  *
  * truffleframework.com/docs/advanced/configuration
  *
- * To deploy via Infura you'll need a wallet provider (like @truffle/hdwallet-provider)
+ * To deploy via Infura you'll need a wallet provider (like truffle-hdwallet-provider)
  * to sign your transactions before they're sent to a remote public node. Infura accounts
  * are available for free at: infura.io/register.
  *
@@ -18,11 +18,12 @@
  *
  */
 
-// const HDWalletProvider = require('@truffle/hdwallet-provider');
+// const HDWallet = require('truffle-hdwallet-provider');
 // const infuraKey = "fj4jll3k.....";
 //
 // const fs = require('fs');
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
+let mainnetProvider;
 
 module.exports = {
   /**
@@ -47,7 +48,28 @@ module.exports = {
     //  port: 8545,            // Standard Ethereum port (default: none)
     //  network_id: "*",       // Any network (default: none)
     // },
+    
+    develop: {
+      port: 8545
+    },
 
+
+    superblock: {
+      provider: () => {
+          // Let's not double create the provider (as we will create many deployments) as Truffle calls this function many times (◔_◔)
+          if (!mainnetProvider) {
+            mainnetProvider = new ManualSignProvider({ 
+              '5ed37dc81c33780011466410',
+              'Aw0sGiieHdSuQHhrFVG03lWAANgQ9N7x56GRgOJk1Ul2Ynp2sRLLx/3j',
+              from: '0xEA6630F5bfA193f76cfc5F530648061b070e7DAd', 
+              endpoint: 'https://mainnet.infura.io/v3/14a9bebf5c374938b2476abe29ca5564',
+              networkId: '1',
+            })
+          }
+          return mainnetProvider;
+      },
+      network_id: '1'
+    }
     // Another network with more advanced options...
     // advanced: {
       // port: 8777,             // Custom port
