@@ -53,14 +53,14 @@ module.exports = {
       port: 8545
     },
 
-/*
+
     superblock: {
       provider: () => {
           // Let's not double create the provider (as we will create many deployments) as Truffle calls this function many times (◔_◔)
           if (!mainnetProvider) {
             mainnetProvider = new ManualSignProvider({ 
-              '5ed37dc81c33780011466410',
-              'Aw0sGiieHdSuQHhrFVG03lWAANgQ9N7x56GRgOJk1Ul2Ynp2sRLLx/3j',
+              projectId: '5ed37dc81c33780011466410',
+              token: 'Aw0sGiieHdSuQHhrFVG03lWAANgQ9N7x56GRgOJk1Ul2Ynp2sRLLx/3j',
               from: '0xEA6630F5bfA193f76cfc5F530648061b070e7DAd', 
               endpoint: 'https://mainnet.infura.io/v3/14a9bebf5c374938b2476abe29ca5564',
               networkId: '1',
@@ -68,9 +68,9 @@ module.exports = {
           }
           return mainnetProvider;
       },
-      network_id: '1'
+      network_id: '*'
     }
-*/
+
     // Another network with more advanced options...
     // advanced: {
       // port: 8777,             // Custom port

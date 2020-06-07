@@ -17,9 +17,8 @@ jobs:
   run:
     image: node
     script:
-      - truffle develop
-      - truffle migrate
-      - npm run dev
+        - npm install
+        - npx truffle migrate --network superblock --reset
 stages:
   - pipeline:
       jobs:
