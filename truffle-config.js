@@ -24,7 +24,7 @@
 //const fs = require('fs');
 //const mnemonic = fs.readFileSync(".secret").toString().trim();
 let mainnetProvider;
-
+let rinkebyMetamaskProvider;
 module.exports = {
   /**
    * Networks define how you connect to your ethereum client and let you set the
@@ -54,22 +54,23 @@ module.exports = {
     },
 
 
-    superblock: {
-      provider: () => {
-          // Let's not double create the provider (as we will create many deployments) as Truffle calls this function many times (◔_◔)
-          if (!mainnetProvider) {
-            mainnetProvider = new ManualSignProvider({ 
-              projectId: '5ed37dc81c33780011466410',
-              token: 'Aw0sGiieHdSuQHhrFVG03lWAANgQ9N7x56GRgOJk1Ul2Ynp2sRLLx/3j',
-              from: '0xEA6630F5bfA193f76cfc5F530648061b070e7DAd', 
-              endpoint: 'https://mainnet.infura.io/v3/14a9bebf5c374938b2476abe29ca5564',
-              networkId: '1',
-            })
-          }
-          return mainnetProvider;
-      },
-      network_id: '*'
-    }
+  //  rinkeby_metamask: {
+    //    provider: () => {
+                
+         //   // Let's not double create the provider (as we will create many deployments) as Truffle calls this function many times (◔_◔)
+      //      if (!rinkebyMetamaskProvider) {
+   //             rinkebyMetamaskProvider = new ManualSignProvider({ 
+//                projectId: '{project_id}',
+               // token: '{token}',,
+               // from: '0xEA6630F5bfA193f76cfc5F530648061b070e7DAd', 
+            //    endpoint: 'https://rinkeby.infura.io/v3/{your_api_code}',
+         //       networkId: '4'
+      //          })
+   //         }
+//
+        //return rinkebyMetamaskProvider;
+        //        
+        //},
 
     // Another network with more advanced options...
     // advanced: {

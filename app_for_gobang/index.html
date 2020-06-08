@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gobang</title>
+</head>
+<body>
+<header>
+    <div id="creatRoom" onclick="App.createRoom()" class="game_button" style="display: none;">创建房间</div>
+    <input type="text" id="room_id">
+    <div id="joinGame" onclick="App.joinGame()" class="game_button" style="display: none;">加入房间</div>
+    <div id="getMyMoney" onclick="App.getMyMoney()" class="game_button" style="display: none;">getMyMoney</div>
+</header>
+<canvas id="chess" width="450px" height="450px"></canvas>
+<br><br>
+<span id="status"></span>
+<br>
+<script src="./app.js"></script>
+</body>
+</html>
