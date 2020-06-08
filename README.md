@@ -41,3 +41,20 @@ RequestError: Error: connect ECONNREFUSED 0.0.0.0:443
 ```
 
 raw.githubusercontent.com 域名污染,see: https://bbs.huaweicloud.com/blogs/143682
+
+## Develop
+
+1.启动环境
+
+```
+truffle develop
+```
+
+2.运行
+
+```
+truffle migrate
+cd app | npm run dev
+```
+
+3. 打开 localhost:8080
