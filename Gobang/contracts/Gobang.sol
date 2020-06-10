@@ -1,4 +1,4 @@
-pragma solidity >=0.4.21 <0.7.0;
+pragma solidity ^0.4.23;
 
 contract Gobang {
     //游戏状态：0-未开始，1-游戏中，2-已结束
@@ -31,7 +31,7 @@ contract Gobang {
 
     function createRoom(uint32 _roomId) public payable {
         require(_roomId > 0, "room id must greater than zero");
-        require(rooms[_roomId].players[0].id == address(0x0), "this room is not empty");
+        require(rooms[_roomId].players[0].id == 0x0, "this room is not empty");
         require(msg.value >= BET_MONEY, "need 1 ether bet fund");
         rooms[_roomId].players[0].id = msg.sender;
         rooms[_roomId].players[0].money = msg.value;
@@ -40,8 +40,8 @@ contract Gobang {
     //加入游戏
     function joinGame(uint32 _roomId) public payable{
         require(_roomId > 0);
-        require(rooms[_roomId].players[0].id != address(0x0) , "this room is empty");
-        require(rooms[_roomId].players[1].id == address(0x0), "there two players in the room");
+        require(rooms[_roomId].players[0].id != 0x0 , "this room is empty");
+        require(rooms[_roomId].players[1].id == 0x0, "there two players in the room");
         require(msg.value >= BET_MONEY, "need 1 ether bet fund");
 
         rooms[_roomId].players[1].id = msg.sender;
@@ -92,7 +92,7 @@ contract Gobang {
         }
     }
 
-    function getNewestState(uint32 _roomId) public view returns (uint8, address, address, GameStatus, uint8[15][15] memory) {
+    function getNewestState(uint32 _roomId) public view returns (uint8, address, address, GameStatus, uint8[15][15]) {
         return (rooms[_roomId].playerTurn, rooms[_roomId].players[0].id, rooms[_roomId].players[1].id, rooms[_roomId].playStatus, rooms[_roomId].chessboard);
     }
 
