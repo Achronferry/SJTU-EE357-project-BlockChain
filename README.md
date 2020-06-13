@@ -50,7 +50,7 @@ raw.githubusercontent.com 域名污染,see: https://bbs.huaweicloud.com/blogs/14
 truffle develop
 ```
 
-2.运行
+2.运行(in another shell)
 
 ```
 truffle migrate
