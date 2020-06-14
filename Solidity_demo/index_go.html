@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>五子棋</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        html,body{
+            position: relative;
+            background-color: #336;
+            width: 100%;
+            height: 100%;
+        }
+        p{
+            font-size: 20px;
+            color: #fff;
+            text-align: center;
+            padding-top: 20px;
+        }
+        #canvas{
+            position: absolute;
+            display: block;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+            background-color: #fff;
+            width: 480px;
+            height: 480px;
+        }
+    </style>
+</head>
+<body>
+    <p id="order">该黑棋落子了！</p>
+    <canvas id="canvas" width="480" height="480"></canvas>
+</body>
+<script>
+    var p = document.getElementById("order");
+    var canvas = document.querySelector("#canvas");
+    var context = canvas.getContext('2d');
+    var cw,ch,count=0,
+        t = canvas.offsetTop,
+        l = canvas.offsetLeft;
+    var state = new Array();
+    ~~function setSize(){
+        window.onresize = arguments.callee;
+        cw = window.innerWidth;
+        ch = window.innerHeight;
+        canvas.width = cw;
+        canvas.height = ch;
+    }
+ 
+    function initArray(state){ 
+        for(var i=0;i<15;i++){
+            state[i] = new Array();
+            for(var j=0;j<15;j++){
+                state[i][j] = -1;
+            }
+        }
+    }
+ 
+    function init(){
+        //画棋盘
+        context.beginPath();
+        for(var i=1;i<16;i++){
+            context.moveTo(30*i,30);
+            context.lineTo(30*i,450);
+        }
+        for(var i=1;i<16;i++){
+            context.moveTo(30,30*i);
+            context.lineTo(450,30*i);
+        }
+        context.stroke();
+        //画棋点
+        draw(240,240,3);
+        draw(120,120,3);
+        draw(360,120,3);
+        draw(120,360,3);
+        draw(360,360,3);    
+    }
+ 
+    //画空心圆
+    function draw(x,y,r){
+        context.beginPath();
+        context.arc(x,y,r,0,Math.PI*2);
+        context.stroke();
+    }
+ 
+    function Chess(){};
+ 
+    Chess.prototype = {
+        //画棋子
+        drawChess: function(x,y,r){
+            this.x = x;
+            this.y = y;
+            this.r = r;
+            if(count == 0){
+                context.fillStyle = "black";
+                count = 1;
+            }
+            else{
+                context.fillStyle = "white";
+                count = 0;
+            }
+            context.beginPath();
+            context.arc(x,y,r,0,Math.PI*2);
+            context.fill();
+        },
+        //判断胜负
+        rule: function(ix,iy,s){
+            var hc=0,vc=0,rdc=0,luc=0;
+ 
+            //horizontal
+            for(var i=ix;i<15;i++){
+                if(state[i][iy] != s){
+                    break;
+                }
+                hc++;
+            }
+            for(var i=ix-1;i>=0;i--){
+                if(state[i][iy] != s){
+                    break;
+                }
+                hc++;
+            }
+            //vertical
+            for(var j=iy;j<15;j++){
+                if(state[ix][j] != s){
+                    break;
+                }
+                vc++;
+            }
+            for(var j=iy-1;j>=0;j--){
+                if(state[ix][j] != s){
+                    break;
+                }
+                vc++;
+            }
+        
+            //rightdown
+            for(var i=ix,j=iy;i<15 && j<15;i++,j++){
+                if(state[i][j] != s){
+                    break;
+                }
+                rdc++;
+            }
+            for(var i=ix-1,j=iy-1;i>=0 && j>=0;i--,j--){
+                if(state[i][j] != s){
+                    break;
+                }
+                rdc++;
+            }
+ 
+            //leftup
+            for(var i=ix,j=iy;i<15 && j>=0;i++,j--){
+                if(state[i][j] != s){
+                        break;
+                    }
+                luc++;
+            }
+            for(var i=ix-1,j=iy+1;i>=0 && j<15;i--,j++){
+                if(state[i][j] != s){
+                    break;
+                }
+                luc++;
+            }
+ 
+            if(hc == 5 || vc == 5 || rdc == 5 || luc == 5){
+                if(s == 0){
+                    alert("Black Win!");
+                }
+                else{
+                    alert("White Win!");
+                }
+ 
+                //清空画布并初始化画布和棋子状态
+                context.clearRect(0,0,480,480);
+                p.innerText = "该黑棋落子了！";
+                init();
+                initArray(state);
+            }
+        }
+ 
+    }
+ 
+    //点击事件
+    canvas.onclick = function(e){
+        var w,h;
+        w = e.pageX - l;
+        h = e.pageY - t;
+        w = parseInt((w+15)/30) * 30;
+        h = parseInt((h+15)/30) * 30;
+        var i = w/30-1;
+        var j = h/30-1;
+        //棋子冲突检查
+        if(state[i][j] == -1){
+            var s = count;   
+            state[i][j] = count;
+            var chess = new Chess();
+            chess.drawChess(w,h,14);
+            draw(w,h,14);
+            if(s == 0){
+                p.innerText = "该白棋落子了！";
+            }
+            else{
+                p.innerText = "该黑棋落子了！";
+            }
+            chess.rule(i,j,s);
+        }
+    }
+    init();
+    initArray(state);
+</script>
+</html>
