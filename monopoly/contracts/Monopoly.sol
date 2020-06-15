@@ -21,6 +21,7 @@ contract Monopoly {
     uint8 level;
     uint8 up_rate;
     uint32 base_price;
+    uint32 price_tax_rate;
     }
 
     struct Room {
@@ -41,6 +42,58 @@ contract Monopoly {
     event GameStart();
     event GameOver(uint8 winner);
     event PlayerChange();
+
+      function random() public view returns (uint) {
+      return uint(uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty)))%251);
+    }
+    
+    
+    function map_initial(uint32 _roomId,  uint _territoryNum ) private{
+        require( _territoryNum  < boardSize - 1, "Not beyond boardSize");
+        //initial map
+        for (uint i = 0; i < boardSize; ++i)
+             rooms[_roomId].chessboard[i].grid_type = 1;   
+        
+
+        //initial territory
+        for (uint i = 0; i < _territoryNum; ++i){
+            uint rand = random()%36;
+            if (rand == 0 && rooms[_roomId].chessboard[rand].grid_type == 0)
+                i--;
+            else
+               rooms[_roomId].chessboard[rand].grid_type = 0;
+        }
+    }
+    
+    function  move(uint32 _roomId) private{
+        uint8 step = uint8(random()%6);
+        Room storage now_room = rooms[_roomId];
+        uint8 _playerTurn = now_room.playerTurn;
+        now_room.players[_playerTurn].position += step;
+    }
+    
+    
+    function Is_territory(uint32 _roomId) private view returns (bool){
+        uint8 _playerTurn = rooms[_roomId].playerTurn;
+        uint position =  rooms[_roomId].players[_playerTurn].position;
+        if (rooms[_roomId].chessboard[position].grid_type == 0)
+              return true;
+        return false;
+    }
+    
+    function PayTax(uint32 _roomId) private{
+        uint8 _playerTurn = rooms[_roomId].playerTurn;
+        uint position =  rooms[_roomId].players[_playerTurn].position;
+        Grid storage _grid = rooms[_roomId].chessboard[position];
+        Player storage _player = rooms[_roomId].players[_playerTurn];
+        uint32 tax = _grid.base_price* (_grid.level+1) * (_grid.price_tax_rate + _grid.up_rate/10 * _grid.level);
+        _player.money -= tax;
+    }
+    
+    function Is_Bankruptcy(uint32 _roomId) private{
+        
+        
+    }
 
     function createRoom(uint32 _roomId) public payable {
         require(_roomId > 0, "room id must greater than zero");
