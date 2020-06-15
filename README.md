@@ -42,6 +42,33 @@ RequestError: Error: connect ECONNREFUSED 0.0.0.0:443
 
 raw.githubusercontent.com 域名污染,see: https://bbs.huaweicloud.com/blogs/143682
 
+
+
+```javascript
+    PlayerStateListener = await App.monopoly.events.PlayerChange(function (error, event) {
+        console.log(event);
+    })
+        .on('data', function (event) {
+            App.updatePlayerInfo();
+        })
+        .on('error', console.error);
+>>>>>>>>>>>>>>>>>>>>>>>>>>
+This has no responce in browser
+```
+
+Web3.providers.HttpProvider => Web3.providers.WebsocketProvider ;
+
+
+
+```javascript
+>>>>>>>>>>>>>>>>>>>>>>>>>>
+this.monopoly is null.
+```
+
+use keyword: await / async ;
+
+
+
 ## Develop
 
 1.启动环境

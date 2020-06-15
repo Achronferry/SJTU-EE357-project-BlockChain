@@ -161,6 +161,6 @@ window.addEventListener("load", async function () {
             App.updatePlayerInfo();
         })
         .on('error', console.error);
-    
+
 });
 
