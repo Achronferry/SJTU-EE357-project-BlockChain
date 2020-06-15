@@ -1,7 +1,6 @@
 {
   "name": "app",
   "version": "1.0.0",
-  "description": "",
   "private": true,
   "scripts": {
     "build": "webpack",
@@ -15,5 +14,9 @@
   },
   "dependencies": {
     "web3": "^1.2.4"
-  }
+  },
+  "main": "webpack.config.js",
+  "author": "",
+  "license": "ISC",
+  "description": ""
 }
