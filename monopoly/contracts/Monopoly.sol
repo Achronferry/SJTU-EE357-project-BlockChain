@@ -13,6 +13,7 @@ contract Monopoly {
         uint8 position;
         uint32 money;
     }
+    // 自己的地正常计算，别人的地加倍
     // price = base_price * (level+1) 0<=level<3 if level==3 cannot buy
     // tax = base_price * (level+1) * (price_tax_rate + up_rate/10 * level)
     struct Grid {
@@ -48,7 +49,7 @@ contract Monopoly {
     }
     
     
-    function map_initial(uint32 _roomId,  uint _territoryNum ) private{
+    function Game_initial(uint32 _roomId,  uint _territoryNum ) private{
         require( _territoryNum  < boardSize - 1, "Not beyond boardSize");
         //initial map
         for (uint i = 0; i < boardSize; ++i)
@@ -60,12 +61,25 @@ contract Monopoly {
             uint rand = random()%36;
             if (rand == 0 && rooms[_roomId].chessboard[rand].grid_type == 0)
                 i--;
-            else
-               rooms[_roomId].chessboard[rand].grid_type = 0;
+            else{
+                rooms[_roomId].chessboard[rand].grid_type = 0;
+                rooms[_roomId].chessboard[rand].level = 0;
+                rooms[_roomId].chessboard[rand].up_rate = 1;
+                rooms[_roomId].chessboard[rand].base_price = 10;
+                rooms[_roomId].chessboard[rand].price_tax_rate = 2;
+            }
+               
         }
+        
+        for (uint i = 0; i<rooms[_roomId].player_num;++i){
+            rooms[_roomId].players[i].money = 10000;
+            rooms[_roomId].players[i].position = 0;
+            
+        }    
+         
     }
     
-    function  move(uint32 _roomId) private{
+    function move(uint32 _roomId) private{
         uint8 step = uint8(random()%6);
         Room storage now_room = rooms[_roomId];
         uint8 _playerTurn = now_room.playerTurn;
@@ -88,10 +102,52 @@ contract Monopoly {
         Player storage _player = rooms[_roomId].players[_playerTurn];
         uint32 tax = _grid.base_price* (_grid.level+1) * (_grid.price_tax_rate + _grid.up_rate/10 * _grid.level);
         _player.money -= tax;
+        for (uint i =0;i<4;++i){
+            if (_grid.belong_to == rooms[_roomId].players[_playerTurn].id )
+                rooms[_roomId].players[_playerTurn].money += tax;
+        }
+        
     }
     
-    function Is_Bankruptcy(uint32 _roomId) private{
-        
+    function Is_Bankruptcy(uint32 _roomId) private view returns (bool){
+        uint8 _playerTurn = rooms[_roomId].playerTurn;
+        Player memory _player = rooms[_roomId].players[_playerTurn];
+        return ( _player.money < 0);
+    }
+
+    //先判断是不是自己的, 能不能买 先不判断了
+
+    //计算资费和看够不够，确保够
+
+    function Buy_territory(uint32 _roomId) private{
+        uint8 _playerTurn = rooms[_roomId].playerTurn;
+        uint position =  rooms[_roomId].players[_playerTurn].position;
+        Grid storage _grid = rooms[_roomId].chessboard[position];
+        Player storage _player = rooms[_roomId].players[_playerTurn];
+        uint32 money2pay;
+        if (_grid.belong_to == msg.sender && _grid.level < 3 ){
+             money2pay = _grid.base_price * (_grid.level+1);
+            _player.money -= money2pay;
+        }
+        else {
+            money2pay = _grid.base_price * (_grid.level+1)*2;
+            _player.money -= money2pay;
+            for (uint i =0;i<4;++i){
+                if (_grid.belong_to == rooms[_roomId].players[_playerTurn].id )
+                    rooms[_roomId].players[_playerTurn].money += money2pay;
+            
+            }
+        }
+        _grid.belong_to = msg.sender;
+        _grid.level++;
+    }
+    
+    function changeplayer(uint32 _roomId) private{
+        uint8  _playerTurn = rooms[_roomId].playerTurn;
+        if (_playerTurn ==  rooms[_roomId].player_num)
+            rooms[_roomId].player_num = 1;
+        else
+            rooms[_roomId].playerTurn = (_playerTurn+1);
         
     }
 
@@ -101,6 +157,12 @@ contract Monopoly {
         rooms[_roomId].players[0].id = msg.sender;
         rooms[_roomId].player_num = 1;
     }
+
+    // function GameTesting(uint32 _roomId) private{
+    //     map_initial(_roomId,  10 );
+    //     move(_roomId);
+        
+    // }
 
     //加入游戏
     function joinRoom(uint32 _roomId) public payable{
