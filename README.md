@@ -93,7 +93,7 @@ cd app | npm run dev
 ```solidity
 function goBankrupt(uint32 _roomId, uint player_turn) public view return {
 	// all grid belong to this player iturns free;
-	emit BankRupt(his address , his money(minus), current left player num)
+	emit BankRupt(_roomId, , his platyer_turn,his address , his money(minus), current left player num)
 }
 ```
 
