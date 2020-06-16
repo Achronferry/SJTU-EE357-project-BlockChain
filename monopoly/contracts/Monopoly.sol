@@ -4,7 +4,7 @@ contract Monopoly {
     //游戏状态：0-未开始，1-游戏中
     enum GameStatus {waiting, playing}
 
-    uint constant boardSize = 36;
+    uint constant boardSize = 28;
     uint grid_maxlevel = 3;
     uint price_tax_rate = 2;
 
@@ -49,15 +49,14 @@ contract Monopoly {
     
     
     function gameInitial(uint32 _roomId) public {
-        require( _territoryNum  < boardSize - 1, "Not beyond boardSize");
         //initial map
         for (uint i = 0; i < boardSize; ++i) {
              if (i % (boardSize / 4) == 0)
                  rooms[_roomId].chessboard[i].grid_type = 0;
              else {
                  rooms[_roomId].chessboard[i].grid_type = 1; 
-                 rooms[_roomId].chessboard[rand].up_rate = random()%10; 
-                 rooms[_roomId].chessboard[rand].base_price = (10 + random()%40) * 100;
+                 rooms[_roomId].chessboard[i].up_rate = random()%10; 
+                 rooms[_roomId].chessboard[i].base_price = (10 + random()%40) * 100;
              }
 	}  
         
@@ -71,6 +70,7 @@ contract Monopoly {
         emit GameStart();
     }
     
+
     function move(uint32 _roomId) private{
         uint8 step = uint8(random()%6);
         Room storage now_room = rooms[_roomId];
@@ -92,7 +92,7 @@ contract Monopoly {
         uint position =  rooms[_roomId].players[_playerTurn].position;
         Grid storage _grid = rooms[_roomId].chessboard[position];
         Player storage _player = rooms[_roomId].players[_playerTurn];
-        uint32 tax = _grid.base_price* (_grid.level+1) * (_grid.price_tax_rate + _grid.up_rate/10 * _grid.level);
+        uint32 tax = _grid.base_price* (_grid.level+1) * (1 + _grid.up_rate/10 * _grid.level);
         _player.money -= tax;
         for (uint i =0;i<4;++i){
             if (_grid.belong_to == rooms[_roomId].players[_playerTurn].id )
@@ -157,7 +157,7 @@ contract Monopoly {
     // }
 
     //加入游戏
-    function joinRoom(uint32 _roomId) public payable{
+    function joinRoom(uint32 _roomId) public payable returns(uint8 player_num){
         require(_roomId > 0);
         require(rooms[_roomId].player_num != 0 , "this room is empty");
         require(rooms[_roomId].player_num != 4, "this room is full");
@@ -167,6 +167,7 @@ contract Monopoly {
         // rooms[_roomId].playStatus = GameStatus.playing;
         rooms[_roomId].player_num = rooms[_roomId].player_num + 1;
         emit PlayerChange();
+        return rooms[_roomId].player_num;
     }
 
     function getRoomInfo(uint32 _roomId) public view returns(address p1_add, uint8 p1_pos, uint32 p1_mny,address p2_add, uint8 p2_pos, uint32 p2_mny, address p3_add, uint8 p3_pos, uint32 p3_mny, address p4_add, uint8 p4_pos, uint32 p4_mny){

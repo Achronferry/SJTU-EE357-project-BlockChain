@@ -1,7 +1,6 @@
 body {
-  margin-left: 25%;
-  margin-right: 25%;
-  margin-top: 10%;
+  margin-left: 10%;
+  margin-right: 10%;
   font-family: "Open Sans", sans-serif;
 }
 
@@ -16,28 +15,12 @@ input {
   font-size: 16px;
 }
 
-button {
+.roombn {
   font-size: 16px;
   padding: 5px;
 }
 
-h1, h2 {
-  display: inline-block;
-  vertical-align: middle;
-  margin-top: 0px;
-  margin-bottom: 10px;
-}
 
-h2 {
-  color: #AAA;
-  font-size: 32px;
-}
-
-h3 {
-  font-weight: normal;
-  color: #AAA;
-  font-size: 24px;
-}
 
 .black {
   color: black;
@@ -49,4 +32,25 @@ h3 {
 
 .hint {
   color: #666;
+}
+
+.playerinfo {
+  width: 225px;
+  word-wrap:break-word;
+  word-break: break-all;
+  overflow: hidden
+}
+
+.map {
+  width: 748px;
+  height: 100%;
+  overflow: hidden;
+  background: green;
+  float: right;
+}
+
+.grid {
+  width: 12.5%;
+  height: 12.5%;
+  border: black;
 }

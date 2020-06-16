@@ -4,7 +4,10 @@ import Web3 from "web3";
 import monopolyArtifact from "../../build/contracts/Monopoly.json";
 
 let roomId = 0
+let myTurn = 0
+let RoomStatus = 0 // 0-wait 1-play
 let PlayerStateListener
+let GameStartListener
 
 
 const App = {
@@ -52,6 +55,7 @@ const App = {
         await createRoom(roomId).send({from: this.account}).then(async function (re) {
             await self.JumptoRoom();
             self.setStatus('Create room success');
+            myTurn = 1;
             console.log('createRoom -- roomId=' + roomId);
         }).catch(function (e) {
             console.log('Failed when creating room-' + roomId)
@@ -84,23 +88,21 @@ const App = {
 
     JumptoRoom: async function () {
         document.getElementById('body').innerHTML = "\n" +
-            "<h1>Monopoly</h1>\n" +
-            "<div><b>Room :</b><i id=\"roomid\">000000</i></div>\n" +
+            "<h1 style='width: 100%; text-align: center'>Monopoly</h1>\n" +
+            "<div><b>Room :</b><i id=\"roomid\">000000</i></div></br>\n" +
             "\n" +
-            "<div>\n" +
-            "<div id=\"player_info\" style='float: left;width: 600px'>\n" +
-            "<div id=\"p1\">empty</div>\n" +
-            "<div id=\"p2\">empty</div>\n" +
-            "<div id=\"p3\">empty</div>\n" +
-            "<div id=\"p4\">empty</div>\n" +
+            "<div style='height: 480px'>\n" +
+            "<div id=\"player_info\" style='float: left;width: 250px'>\n" +
+            "</br><div id=\"p1\" class='playerinfo'>empty</div></br>\n" +
+            "</br><div id=\"p2\" class='playerinfo'>empty</div></br>\n" +
+            "</br><div id=\"p3\" class='playerinfo'>empty</div></br>\n" +
+            "</br><div id=\"p4\" class='playerinfo'>empty</div></br>\n" +
             "</div>\n" +
-            "<div id=\"map_info\" style='overflow: hidden'>\n" +
-            "    map\n" +
+            "<div id=\"map_info\" class='map'>\n" +
+            "<button style='margin-left: 45%;margin-top: 30%;' onclick=\"App.startGame()\">START</button>\n" +
             "</div>\n" +
             "</div>\n" +
-            "</br>\n" +
-            "</br>\n" +
-            "</br>\n" +
+            "</br></br></br>\n" +
             "<p id=\"status\"> none </p>\n" +
             "<p>\n" +
             "    -----------------------------------------------</br>\n" +
@@ -132,8 +134,24 @@ const App = {
             "<div id=\"add4\">" + p_state[9] + "</div>\n" +
             "<div id=\"pos4\">" + p_state[10] + "</div>\n" +
             "<div id=\"mny4\">" + p_state[11] + "</div>\n"
-    }
+    },
 
+
+    startGame: async function () {
+        let grid_html = "<table style='width: 100%; height: 100%'>";
+
+        for (let i=0;i < 8; i++) {
+            grid_html += "<tr>"
+            for (let j=0;j < 8; j++) {
+                grid_html += "<td>"+j+"</td>";
+            }
+            grid_html += "</tr>\n"
+        }
+        grid_html += "</table>\n"
+        document.getElementById('map_info').innerHTML = grid_html;
+        await this.monopoly.methods.gameInitial(roomId).send({from: this.account});
+        await this.updatePlayerInfo();
+    },
 };
 
 window.App = App;
@@ -161,6 +179,15 @@ window.addEventListener("load", async function () {
             App.updatePlayerInfo();
         })
         .on('error', console.error);
+
+    GameStartListener = await App.monopoly.events.GameStart(function (error, event) {
+        console.log(event);
+    })
+        .on('data', function (event) {
+            App.startGame();
+        })
+        .on('error', console.error);
+
 
 });
 
