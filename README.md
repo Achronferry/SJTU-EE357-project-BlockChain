@@ -53,7 +53,7 @@ raw.githubusercontent.com 域名污染,see: https://bbs.huaweicloud.com/blogs/14
         })
         .on('error', console.error);
 >>>>>>>>>>>>>>>>>>>>>>>>>>
-This has no responce in browser
+This has no response in browser
 ```
 
 Web3.providers.HttpProvider => Web3.providers.WebsocketProvider ;
@@ -85,3 +85,46 @@ cd app | npm run dev
 ```
 
 3. 打开 localhost:8080
+
+
+
+### Solodity API
+
+```solidity
+function goBankrupt(uint32 _roomId, uint player_turn) public view return {
+	// all grid belong to this player iturns free;
+	emit BankRupt(his address , his money(minus), current left player num)
+}
+```
+
+### 
+
+```solidity
+function move(uint32 _roomId, uint player_turn) public view return {
+    assert player_turn == room player turn
+    random move
+    pay tax (if gridtype = 1)
+    check breakup (if gridtype = 1)
+    check affordable -> buy (if gridtype = 1 and level < 3)
+    if not buy
+        find next turn and change room player turn(skip bankrupted one)
+	    emit OneStep(_roomId, move_step_len, next_player_turn)
+	if buy
+	    emit BuyGrid(_roomId, move_step_len, cost, player_turn, player_position)
+}
+```
+
+
+
+```solidity
+function buy(uint32 _roomId, uint player_turn, uint player_position) public view return {
+    assert player_turn == room player turn
+    - money
+    set grid
+
+    find next turn and change room player turn(skip bankrupted one)
+	emit OneStep(_roomId, 0, next_player_turn)
+
+}
+```
+

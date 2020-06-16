@@ -1,8 +1,8 @@
 pragma solidity >=0.4.21 <0.7.0;
 
 contract Monopoly {
-    //游戏状态：0-未开始，1-游戏中，2-已结束
-    enum GameStatus {start, playing, over}
+    //游戏状态：0-未开始，1-游戏中
+    enum GameStatus {waiting, playing}
 
     uint constant boardSize = 36;
     uint grid_maxlevel = 3;
@@ -15,19 +15,18 @@ contract Monopoly {
     }
     // 自己的地正常计算，别人的地加倍
     // price = base_price * (level+1) 0<=level<3 if level==3 cannot buy
-    // tax = base_price * (level+1) * (price_tax_rate + up_rate/10 * level)
+    // tax = base_price * level * ( 1 + up_rate/10 * level)
     struct Grid {
     uint8 grid_type; //0-personal 1-start 2-event
-    address belong_to;
+    uint8 belong_to;
     uint8 level;
     uint8 up_rate;
     uint32 base_price;
-    uint32 price_tax_rate;
     }
 
     struct Room {
         Player[4] players;
-        //是哪个选手的轮次:0-none;1-player1;2-player2;...
+        //是哪个选手的轮次:0-none ;1-player1;2-player2;...
         uint8 playerTurn;
         GameStatus playStatus;
         Grid[boardSize] chessboard;
@@ -49,34 +48,27 @@ contract Monopoly {
     }
     
     
-    function Game_initial(uint32 _roomId,  uint _territoryNum ) private{
+    function gameInitial(uint32 _roomId) public {
         require( _territoryNum  < boardSize - 1, "Not beyond boardSize");
         //initial map
-        for (uint i = 0; i < boardSize; ++i)
-             rooms[_roomId].chessboard[i].grid_type = 1;   
+        for (uint i = 0; i < boardSize; ++i) {
+             if (i % (boardSize / 4) == 0)
+                 rooms[_roomId].chessboard[i].grid_type = 0;
+             else {
+                 rooms[_roomId].chessboard[i].grid_type = 1; 
+                 rooms[_roomId].chessboard[rand].up_rate = random()%10; 
+                 rooms[_roomId].chessboard[rand].base_price = (10 + random()%40) * 100;
+             }
+	}  
         
-
-        //initial territory
-        for (uint i = 0; i < _territoryNum; ++i){
-            uint rand = random()%36;
-            if (rand == 0 && rooms[_roomId].chessboard[rand].grid_type == 0)
-                i--;
-            else{
-                rooms[_roomId].chessboard[rand].grid_type = 0;
-                rooms[_roomId].chessboard[rand].level = 0;
-                rooms[_roomId].chessboard[rand].up_rate = 1;
-                rooms[_roomId].chessboard[rand].base_price = 10;
-                rooms[_roomId].chessboard[rand].price_tax_rate = 2;
-            }
-               
-        }
-        
+       
         for (uint i = 0; i<rooms[_roomId].player_num;++i){
-            rooms[_roomId].players[i].money = 10000;
-            rooms[_roomId].players[i].position = 0;
-            
-        }    
-         
+            rooms[_roomId].players[i].money = 20000;
+            rooms[_roomId].players[i].position = 0;  
+        }
+        rooms[_roomId].playStatus = GameStatus.playing;
+        rooms[_roomId].playerTurn = 1;
+        emit GameStart();
     }
     
     function move(uint32 _roomId) private{
@@ -169,6 +161,7 @@ contract Monopoly {
         require(_roomId > 0);
         require(rooms[_roomId].player_num != 0 , "this room is empty");
         require(rooms[_roomId].player_num != 4, "this room is full");
+        require(rooms[_roomId].playStatus == GameStatus.waiting, "The game has begun.");
 
         rooms[_roomId].players[rooms[_roomId].player_num].id = msg.sender;
         // rooms[_roomId].playStatus = GameStatus.playing;
