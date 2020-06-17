@@ -4,7 +4,7 @@ contract Monopoly {
     //游戏状态：0-未开始，1-游戏中
     enum GameStatus {waiting, playing}
 
-    uint constant boardSize = 28;
+    uint8 constant boardSize = 28;
     uint grid_maxlevel = 3;
     uint price_tax_rate = 2;
     uint256 rand_seed = 1;
@@ -80,14 +80,14 @@ contract Monopoly {
     
 
     function move(uint32 _roomId, uint8 player_turn) public {
-    
+    uint8 _player_turn = player_turn - 1;
     require(player_turn == rooms[_roomId].playerTurn,'error player dump');
-    require(msg.sender == rooms[_roomId].players[player_turn].id,'error player address');
+    require(msg.sender == rooms[_roomId].players[_player_turn].id,'error player address');
     uint8 step = uint8(random()%6 + 1);
-    Room storage now_room = rooms[_roomId];
-    now_room.players[player_turn].position += step;
+    rooms[_roomId].players[_player_turn].position += step;
+    rooms[_roomId].players[_player_turn].position %= boardSize;
     
-    uint8 position =  rooms[_roomId].players[player_turn].position;
+    uint8 position =  rooms[_roomId].players[_player_turn].position;
     Grid storage _grid = rooms[_roomId].chessboard[position];
     if (rooms[_roomId].chessboard[position].grid_type == 1 ){
             PayTax(_roomId);
@@ -96,7 +96,7 @@ contract Monopoly {
         // considerting not BankRupt
         int32 cost = int32(_grid.base_price * (_grid.level+1));
         //buy
-        if (now_room.players[player_turn].money >= cost
+        if (rooms[_roomId].players[_player_turn].money > cost
                 && _grid.level < 3){
                 emit BuyGrid(_roomId, step, cost, player_turn, position);
         }
@@ -118,7 +118,7 @@ contract Monopoly {
     
     // function Is_territory(uint32 _roomId) private view returns (bool){
     //     uint8 _playerTurn = rooms[_roomId].playerTurn;
-    //     uint position =  rooms[_roomId].players[_playerTurn].position;
+    //     uint position =  rooms[_roomId].players[_playerTurn-1].position;
     //     if (rooms[_roomId].chessboard[position].grid_type == 0)
     //           return true;
     //     return false;
@@ -126,17 +126,19 @@ contract Monopoly {
     
     function PayTax(uint32 _roomId) private{
         uint8 _playerTurn = rooms[_roomId].playerTurn;
-        uint8 position =  rooms[_roomId].players[_playerTurn].position;
+        uint8 _player_turn = _playerTurn - 1;
+        uint8 position =  rooms[_roomId].players[_player_turn].position;
         Grid storage _grid = rooms[_roomId].chessboard[position];
-        Player storage _player = rooms[_roomId].players[_playerTurn];
+        Player storage _player = rooms[_roomId].players[_player_turn];
    
         int32 tax = int32( _grid.base_price * _grid.level * ( 1 + _grid.up_rate/10 * _grid.level));
         _player.money -= tax;
-        rooms[_roomId].players[_grid.belong_to].money += tax;
+        uint8 _belong_to = _grid.belong_to-1;
+        rooms[_roomId].players[_belong_to].money += tax;
     }
     
     function Is_Bankruptcy(uint32 _roomId) private view returns (bool){
-        uint8 _playerTurn = rooms[_roomId].playerTurn;
+        uint8 _playerTurn = rooms[_roomId].playerTurn - 1;
         Player memory _player = rooms[_roomId].players[_playerTurn];
         return ( _player.money < 0);
     }
@@ -149,8 +151,8 @@ contract Monopoly {
 	             rooms[_roomId].chessboard[i].level = 0;
 	        }
     }
-    
-	 emit BankRupt(_roomId, player_turn, rooms[_roomId].players[player_turn].id, rooms[_roomId].players[player_turn].money, rooms[_roomId].player_num);
+         uint8 _player_turn = player_turn - 1;
+	 emit BankRupt(_roomId, player_turn, rooms[_roomId].players[_player_turn].id, rooms[_roomId].players[_player_turn].money, rooms[_roomId].player_num);
 }
 
     //先判断是不是自己的, 能不能买 先不判断了
@@ -159,18 +161,20 @@ contract Monopoly {
     
     function buy(uint32 _roomId, uint8 player_turn, bool will_buy) public{
         require(player_turn == rooms[_roomId].playerTurn,'error player dump');
+        uint8 _player_turn = player_turn-1;
         if (will_buy) {
-        uint8 position =  rooms[_roomId].players[player_turn].position;
+        uint8 position =  rooms[_roomId].players[_player_turn].position;
         Grid memory _grid = rooms[_roomId].chessboard[position];
         int32 money2pay = int32(_grid.base_price * (_grid.level+1));
          if ( _grid.belong_to == player_turn){
-             rooms[_roomId].players[player_turn].money -= money2pay;
+             rooms[_roomId].players[_player_turn].money -= money2pay;
  
          }
          else{
              money2pay = money2pay * 2;
-             rooms[_roomId].players[player_turn].money -= money2pay;
-             rooms[_roomId].players[_grid.belong_to].money += money2pay;
+             rooms[_roomId].players[_player_turn].money -= money2pay;
+             uint8 _belong_to = _grid.belong_to-1;
+             rooms[_roomId].players[_belong_to].money += money2pay;
          }
               
         _grid.belong_to = player_turn;
