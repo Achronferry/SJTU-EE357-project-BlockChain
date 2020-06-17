@@ -9,6 +9,8 @@ let RoomStatus = 0 // 0-wait 1-play
 let PlayerStateListener
 let GameStartListener
 let OneStepListener
+let BuyGridListener
+let BuyInfoListener
 
 const App = {
     web3: null,
@@ -88,6 +90,7 @@ const App = {
         document.getElementById('body').innerHTML = "\n" +
             "<h1 style='width: 100%; text-align: center'>Monopoly</h1>\n" +
             "<div><span style='width: 250px;'><b>Room :</b><i id=\"roomid\">000000</i></span><span id='roll'></span></div></br>\n" +
+            "<div><p id=\"status\"> none </p></div>\n" +
             "\n" +
             "<div style='height: 480px'>\n" +
             "<div id=\"player_info\" style='float: left;width: 250px'>\n" +
@@ -101,7 +104,6 @@ const App = {
             "</div>\n" +
             "</div>\n" +
             "</br></br></br>\n" +
-            "<p id=\"status\"> none </p>\n" +
             "<p>\n" +
             "    -----------------------------------------------</br>\n" +
             "    A simple Web page to display.</br>\n" +
@@ -140,7 +142,7 @@ const App = {
         let grid_state = await this.monopoly.methods.getGridInfo(roomId, grid_id).call();
         let update_html = ""
         if (grid_state[2] !== '0') { // private grid
-            update_html += "<div>level: "+ grid_state[0] +"</div>"
+            update_html += "<div>level: " + grid_state[0] + "</div>"
             if (grid_state[1] !== '0') {
                 update_html += "<div>Owner: " + grid_state[1] + "</div>"
                 update_html += "<div>Tax: " + grid_state[3] + "</div>"
@@ -149,13 +151,13 @@ const App = {
                 update_html += "<div>Price: " + grid_state[2] + "</div>"
             }
         }
-        update_html += "<div style='color: red' id='g"+grid_id+"'></div>"
+        update_html += "<div style='color: red' id='g" + grid_id + "'></div>"
         document.getElementById('g' + grid_id).innerHTML = update_html;
 
     },
 
-    clickStart : async function () {
-        await this.monopoly.methods.gameInitial(roomId).send({from: this.account,gas:3000000});
+    clickStart: async function () {
+        await this.monopoly.methods.gameInitial(roomId).send({from: this.account, gas: 3000000});
     },
 
     startGame: async function () {
@@ -165,19 +167,19 @@ const App = {
             grid_html += "<tr>"
             for (let j = 0; j < 8; j++) {
                 if (i === 0) {
-                    grid_html += "<td id='g" + j + "' class='grid'>" + j +"</td>";
+                    grid_html += "<td id='g" + j + "' class='grid'>" + j + "</td>";
                     continue;
                 }
                 if (i === 7) {
-                    grid_html += "<td id='g" + (21-j) + "' class='grid'>" + (21-j) + "</td>";
+                    grid_html += "<td id='g" + (21 - j) + "' class='grid'>" + (21 - j) + "</td>";
                     continue;
                 }
                 if (j === 0) {
-                    grid_html += "<td id='g" + (28-i) + "' class='grid'>" + (28-i) + "</td>";
+                    grid_html += "<td id='g" + (28 - i) + "' class='grid'>" + (28 - i) + "</td>";
                     continue;
                 }
                 if (j === 7) {
-                    grid_html += "<td id='g" + (7+i) + "' class='grid'>" + (7+i) + "</td>";
+                    grid_html += "<td id='g" + (7 + i) + "' class='grid'>" + (7 + i) + "</td>";
                     continue;
                 }
                 grid_html += "<td>" + "</td>";
@@ -188,7 +190,7 @@ const App = {
         document.getElementById('map_info').innerHTML = grid_html;
         // document.getElementById('roll').innerHTML = "<button onclick=\"App.rollMove()\">ROLL</button>"
         await this.updatePlayerInfo();
-        for (let i=0; i<28; i++) {
+        for (let i = 0; i < 28; i++) {
             this.updateGridInfo(i);
         }
         if (myTurn === '1') {
@@ -197,14 +199,15 @@ const App = {
         RoomStatus = 1;
     },
 
-
-    newStep: async function (turn) {
-
-
-    }
-
     rollMove: async function () {
         document.getElementById('roll').innerHTML = "";
+        await this.monopoly.methods.move(roomId,myTurn).send({from: this.account});
+
+    },
+
+    decideBuyGrid: async function(cost, grid) {
+        let will_buy = confirm("Buy this grid in cost of "+ cost + " ?");
+        this.monopoly.methods.buy(roomId, myTurn, will_buy).send({from: this.account});
     },
 };
 
@@ -226,7 +229,7 @@ window.addEventListener("load", async function () {
     }
     await App.start();
 
-    PlayerStateListener = await App.monopoly.events.PlayerChange(function (error, event) {
+    PlayerStateListener = App.monopoly.events.PlayerChange(function (error, event) {
         console.log(event);
     })
         .on('data', function (event) {
@@ -234,7 +237,7 @@ window.addEventListener("load", async function () {
         })
         .on('error', console.error);
 
-    GameStartListener = await App.monopoly.events.GameStart(function (error, event) {
+    GameStartListener = App.monopoly.events.GameStart(function (error, event) {
         console.log(event);
     })
         .on('data', function (event) {
@@ -242,10 +245,47 @@ window.addEventListener("load", async function () {
         })
         .on('error', console.error);
 
-    OneStepListener = await App.monopoly.events.OneStep(function (error, event) {
+    OneStepListener = App.monopoly.events.OneStep(function (error, event) {
         console.log(event);
     })
         .on('data', function (event) {
+            let re = event.returnValues;
+            App.updatePlayerInfo();
+            if (re.step !== '0') {
+                App.setStatus("Player " + re.thisTurn + " moves forward " + re.step + " steps!");
+            }
+            if (re.nextTurn === myTurn) {
+                document.getElementById('roll').innerHTML = "<button onclick=\"App.rollMove()\">ROLL</button>"
+            }
+        })
+        .on('error', console.error);
+
+
+    BuyGridListener = App.monopoly.events.BuyGrid(function (error, event) {
+        console.log(event);
+    })
+        .on('data', function (event) {
+            let re = event.returnValues;
+            App.updatePlayerInfo();
+            if (re.step !== '0') {
+                App.setStatus("Player " + re.thisTurn + " moves forward " + re.step + " steps!");
+            }
+            if (re.thisTurn === myTurn) {
+                App.decideBuyGrid(re.cost, re.grid_pos);
+            }
+        })
+        .on('error', console.error);
+
+
+    BuyInfoListener = App.monopoly.events.OneStep(function (error, event) {
+        console.log(event);
+    })
+        .on('data', function (event) {
+            let re = event.returnValues;
+            App.setStatus("Player " + re.player_turn + "has bought Grid " +
+                re.grid_pos + " within " + re.cost + " RMB!")
+            App.updatePlayerInfo();
+            App.updateGridInfo(re.grid_pos);
         })
         .on('error', console.error);
 });

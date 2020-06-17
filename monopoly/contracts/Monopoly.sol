@@ -38,12 +38,13 @@ contract Monopoly {
 
     uint128 BET_MONEY = 1 ether;
 
-    event OneStep(uint32 x, uint8 y, uint8 thisTurn, uint8 nextTurn);
+    event OneStep(uint32 roomId, uint8 step, uint8 thisTurn, uint8 nextTurn);
     event GameStart();
     event GameOver(uint8 winner);
     event PlayerChange();
-    event BuyGrid(uint32 _roomId,uint8 step, int32 cost, uint8 player_turn,uint8 position);
-    event BankRupt(uint32 _roomId, uint8 player_turn,address add , int32 money, uint8 player_num);
+    event BuyGrid(uint32 roomId, uint8 step, int32 cost, uint8 thisTurn,uint8 grid_pos);
+    event BuyInfo(uint32 roomId, int32 cost, uint8 player_turn, uint8 grid_pos);
+    event BankRupt(uint32 roomId, uint8 player_turn,address add , int32 money, uint8 player_num);
 
 
      function random() public view returns (uint) {
@@ -154,9 +155,10 @@ contract Monopoly {
 
     //计算资费和看够不够，确保够
     
-    function buy(uint32 _roomId, uint8 player_turn) public{
+    function buy(uint32 _roomId, uint8 player_turn, bool will_buy) public{
         require(player_turn == rooms[_roomId].playerTurn,'error player dump');
-        uint position =  rooms[_roomId].players[player_turn].position;
+        if (will_buy) {
+        uint8 position =  rooms[_roomId].players[player_turn].position;
         Grid memory _grid = rooms[_roomId].chessboard[position];
         int32 money2pay = int32(_grid.base_price * (_grid.level+1));
          if ( _grid.belong_to == player_turn){
@@ -164,12 +166,15 @@ contract Monopoly {
  
          }
          else{
-             rooms[_roomId].players[player_turn].money -= money2pay*2;
-             rooms[_roomId].players[_grid.belong_to].money += money2pay*2;
+             money2pay = money2pay * 2;
+             rooms[_roomId].players[player_turn].money -= money2pay;
+             rooms[_roomId].players[_grid.belong_to].money += money2pay;
          }
               
         _grid.belong_to = player_turn;
         _grid.level++;
+         emit BuyInfo(_roomId, money2pay, player_turn, position);
+	}
 
          uint8 next_player_turn = changeplayer(_roomId);
          emit OneStep(_roomId, 0, player_turn, next_player_turn);
