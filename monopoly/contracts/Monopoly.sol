@@ -7,7 +7,7 @@ contract Monopoly {
     uint constant boardSize = 28;
     uint grid_maxlevel = 3;
     uint price_tax_rate = 2;
-
+    uint256 rand_seed = 1;
     struct Player {
         address id;
         uint8 position;
@@ -47,10 +47,12 @@ contract Monopoly {
     event BankRupt(uint32 roomId, uint8 player_turn,address add , int32 money, uint8 player_num);
 
 
-     function random() public view returns (uint) {
-      return uint(uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty,now)))%251);
+     function random() public returns (uint) {
+       uint256 t1 = now * rand_seed;
+       rand_seed++;
+      // return rand_seed;
+      return uint(uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty,t1)))%251);
     }
-    
     
     function gameInitial(uint32 _roomId) public  payable{
         //require( _territoryNum  < boardSize - 1, "Not beyond boardSize");
