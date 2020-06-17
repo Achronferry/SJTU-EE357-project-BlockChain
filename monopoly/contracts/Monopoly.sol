@@ -45,8 +45,9 @@ contract Monopoly {
     event BuyGrid(uint32 _roomId,uint8 step, int32 cost, uint8 player_turn,uint8 position);
     event BankRupt(uint32 _roomId, uint8 player_turn,address add , int32 money, uint8 player_num);
 
+
      function random() public view returns (uint) {
-      return uint(uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty)))%251);
+      return uint(uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty,now)))%251);
     }
     
     
@@ -146,7 +147,6 @@ contract Monopoly {
 	        }
     }
     
-     rooms[_roomId].player_num--;
 	 emit BankRupt(_roomId, player_turn, rooms[_roomId].players[player_turn].id, rooms[_roomId].players[player_turn].money, rooms[_roomId].player_num);
 }
 
@@ -177,15 +177,24 @@ contract Monopoly {
 
     }
 
-
     function changeplayer(uint32 _roomId) private returns (uint8){
         uint8  _playerTurn = rooms[_roomId].playerTurn;
-        if (_playerTurn ==  rooms[_roomId].player_num)
-            rooms[_roomId].player_num = 1;
-        else
-            rooms[_roomId].playerTurn = (_playerTurn+1);
-        return rooms[_roomId].playerTurn;
+        uint8 _next_playerTurn = 0;
+        while( _next_playerTurn != _playerTurn){
+             if (_playerTurn ==  rooms[_roomId].player_num)
+                    _next_playerTurn = 1;
+             else
+                _next_playerTurn = (_playerTurn+1);
+                
+            rooms[_roomId].playerTurn = _next_playerTurn;
+            if  (!Is_Bankruptcy(_roomId)  ) 
+                    return rooms[_roomId].playerTurn;
         
+            
+        }
+        emit GameOver(_playerTurn);
+        
+
     }
 
 
