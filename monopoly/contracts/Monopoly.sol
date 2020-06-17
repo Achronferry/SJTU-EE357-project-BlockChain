@@ -38,7 +38,7 @@ contract Monopoly {
 
     uint128 BET_MONEY = 1 ether;
 
-    event OneStep(uint32 x, uint8 y, uint8 playerTurn);
+    event OneStep(uint32 x, uint8 y, uint8 thisTurn, uint8 nextTurn);
     event GameStart();
     event GameOver(uint8 winner);
     event PlayerChange();
@@ -99,13 +99,13 @@ contract Monopoly {
         //not buy
         else{   
                uint8 next_player_turn = changeplayer(_roomId);
-               emit OneStep(_roomId, step, next_player_turn);
+               emit OneStep(_roomId, step, player_turn, next_player_turn);
         }
     }
     //not land
     else{
             uint8 next_player_turn = changeplayer(_roomId);
-            emit OneStep(_roomId, step, next_player_turn);
+            emit OneStep(_roomId, step, player_turn, next_player_turn);
     }
 }
 
@@ -172,8 +172,8 @@ contract Monopoly {
         _grid.level++;
 
          uint8 next_player_turn = changeplayer(_roomId);
-         emit OneStep(_roomId, 0, next_player_turn);
-       // emit OneStep(_roomId, 0, next_player_turn);
+         emit OneStep(_roomId, 0, player_turn, next_player_turn);
+       // emit OneStep(_roomId, 0, player_turn, next_player_turn);
 
     }
 
