@@ -17,7 +17,7 @@ contract Monopoly {
     // price = base_price * (level+1) 0<=level<3 if level==3 cannot buy
     // tax = base_price * level * ( 1 + up_rate/10 * level)
     struct Grid {
-    uint8 grid_type; //0-personal 1-start 2-event
+    uint8 grid_type; //0- nothing 1-buyable 2-event
     uint8 belong_to;
     uint8 level;
     uint8 up_rate;
@@ -70,7 +70,7 @@ contract Monopoly {
         }
         rooms[_roomId].playStatus = GameStatus.playing;
         rooms[_roomId].playerTurn = 1;
-        emit GameStart();
+         emit GameStart();
     }
     
     
@@ -84,13 +84,14 @@ contract Monopoly {
     
     uint8 position =  rooms[_roomId].players[player_turn].position;
     Grid storage _grid = rooms[_roomId].chessboard[position];
-    if (rooms[_roomId].chessboard[position].grid_type == 0 ){
+    if (rooms[_roomId].chessboard[position].grid_type == 1 ){
             PayTax(_roomId);
             if (Is_Bankruptcy(_roomId))
                 goBankrupt(_roomId, player_turn);
+        // considerting not BankRupt
         int32 cost = int32(_grid.base_price * (_grid.level+1));
         //buy
-        if (now_room.players[player_turn].money > cost
+        if (now_room.players[player_turn].money >= cost
                 && _grid.level < 3){
                 buy( _roomId, player_turn, position);
                 emit BuyGrid(_roomId, step, cost, player_turn, position);
@@ -121,7 +122,7 @@ contract Monopoly {
     
     function PayTax(uint32 _roomId) private{
         uint8 _playerTurn = rooms[_roomId].playerTurn;
-        uint position =  rooms[_roomId].players[_playerTurn].position;
+        uint8 position =  rooms[_roomId].players[_playerTurn].position;
         Grid storage _grid = rooms[_roomId].chessboard[position];
         Player storage _player = rooms[_roomId].players[_playerTurn];
    
@@ -159,8 +160,15 @@ contract Monopoly {
         Grid storage _grid = rooms[_roomId].chessboard[position];
         Player storage _player = rooms[_roomId].players[player_turn];
         int32 money2pay = int32(_grid.base_price * (_grid.level+1));
-        _player.money -= money2pay;
-        rooms[_roomId].players[_grid.belong_to].money += money2pay;
+         if ( _grid.belong_to == player_turn){
+             _player.money -= money2pay;
+ 
+         }
+         else{
+             _player.money -= money2pay*2;
+              rooms[_roomId].players[_grid.belong_to].money += money2pay*2;
+         }
+              
         _grid.belong_to = player_turn;
         _grid.level++;
 
@@ -179,6 +187,11 @@ contract Monopoly {
             rooms[_roomId].playerTurn = (_playerTurn+1);
         return rooms[_roomId].playerTurn;
         
+    }
+
+    function info(uint32 _roomId) public view returns (uint8 ,int32, uint8 ,int32 ){
+          Room memory now_room = rooms[_roomId];
+          return (now_room.players[1].position,now_room.players[1].money,now_room.players[2].position,now_room.players[2].money);
     }
 
     function createRoom(uint32 _roomId) public payable {
