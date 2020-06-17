@@ -117,7 +117,7 @@ function move(uint32 _roomId, uint player_turn) public view return {
 
 
 ```solidity
-function buy(uint32 _roomId, uint player_turn, uint player_position) public view return {
+function buy(uint32 _roomId, uint player_turn) public view return {
     assert player_turn == room player turn
     - money
     set grid
