@@ -50,7 +50,7 @@ contract Monopoly {
     }
     
     
-    function gameInitial(uint32 _roomId) public {
+    function gameInitial(uint32 _roomId) public  payable{
         //require( _territoryNum  < boardSize - 1, "Not beyond boardSize");
         //initial map
         for (uint i = 0; i < boardSize; ++i) {
@@ -70,7 +70,7 @@ contract Monopoly {
         }
         rooms[_roomId].playStatus = GameStatus.playing;
         rooms[_roomId].playerTurn = 1;
-         emit GameStart();
+        emit GameStart();
     }
     
     
@@ -93,7 +93,6 @@ contract Monopoly {
         //buy
         if (now_room.players[player_turn].money >= cost
                 && _grid.level < 3){
-                buy( _roomId, player_turn, position);
                 emit BuyGrid(_roomId, step, cost, player_turn, position);
         }
         //not buy
@@ -154,19 +153,18 @@ contract Monopoly {
 
     //计算资费和看够不够，确保够
     
-    function buy(uint32 _roomId, uint8 player_turn, uint8 player_position) public{
+    function buy(uint32 _roomId, uint8 player_turn) public{
         require(player_turn == rooms[_roomId].playerTurn,'error player dump');
         uint position =  rooms[_roomId].players[player_turn].position;
-        Grid storage _grid = rooms[_roomId].chessboard[position];
-        Player storage _player = rooms[_roomId].players[player_turn];
+        Grid memory _grid = rooms[_roomId].chessboard[position];
         int32 money2pay = int32(_grid.base_price * (_grid.level+1));
          if ( _grid.belong_to == player_turn){
-             _player.money -= money2pay;
+             rooms[_roomId].players[player_turn].money -= money2pay;
  
          }
          else{
-             _player.money -= money2pay*2;
-              rooms[_roomId].players[_grid.belong_to].money += money2pay*2;
+             rooms[_roomId].players[player_turn].money -= money2pay*2;
+             rooms[_roomId].players[_grid.belong_to].money += money2pay*2;
          }
               
         _grid.belong_to = player_turn;
@@ -226,6 +224,9 @@ contract Monopoly {
         return (now_room.players[0].id, now_room.players[0].position, now_room.players[0].money, now_room.players[1].id, now_room.players[1].position, now_room.players[1].money, now_room.players[2].id, now_room.players[2].position, now_room.players[2].money, now_room.players[3].id, now_room.players[3].position, now_room.players[3].money);
     }
 
+    function getMyTurn(uint32 _roomId) public view returns(uint8){
+        return rooms[_roomId].player_num;
+    }
 
 
 }

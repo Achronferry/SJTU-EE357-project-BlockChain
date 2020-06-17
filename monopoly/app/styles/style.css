@@ -34,23 +34,39 @@ input {
   color: #666;
 }
 
+
+
+
 .playerinfo {
   width: 225px;
   word-wrap:break-word;
   word-break: break-all;
-  overflow: hidden
+  overflow: hidden;
+  background-color: cornflowerblue;
+}
+
+.myplayerinfo {
+  width: 225px;
+  word-wrap:break-word;
+  word-break: break-all;
+  overflow: hidden;
+  background-color: limegreen;
 }
 
 .map {
   width: 748px;
   height: 100%;
   overflow: hidden;
-  background: green;
   float: right;
 }
 
 .grid {
-  width: 12.5%;
-  height: 12.5%;
-  border: black;
+  border: 1px solid black;
+  border-collapse: collapse;
+  background-color: lightgray;
+}
+
+.center_bn {
+  margin-left: 45%;
+  margin-top: 30%;
 }

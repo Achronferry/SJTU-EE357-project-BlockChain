@@ -55,14 +55,12 @@ const App = {
         await createRoom(roomId).send({from: this.account}).then(async function (re) {
             await self.JumptoRoom();
             self.setStatus('Create room success');
-            myTurn = 1;
             console.log('createRoom -- roomId=' + roomId);
         }).catch(function (e) {
             console.log('Failed when creating room-' + roomId)
             console.log(e);
         });
     },
-
 
     joinRoom: async function () {
         let self = this;
@@ -89,17 +87,17 @@ const App = {
     JumptoRoom: async function () {
         document.getElementById('body').innerHTML = "\n" +
             "<h1 style='width: 100%; text-align: center'>Monopoly</h1>\n" +
-            "<div><b>Room :</b><i id=\"roomid\">000000</i></div></br>\n" +
+            "<div><span style='width: 250px;'><b>Room :</b><i id=\"roomid\">000000</i></span><span id='roll'></span></div></br>\n" +
             "\n" +
             "<div style='height: 480px'>\n" +
             "<div id=\"player_info\" style='float: left;width: 250px'>\n" +
-            "</br><div id=\"p1\" class='playerinfo'>empty</div></br>\n" +
-            "</br><div id=\"p2\" class='playerinfo'>empty</div></br>\n" +
-            "</br><div id=\"p3\" class='playerinfo'>empty</div></br>\n" +
-            "</br><div id=\"p4\" class='playerinfo'>empty</div></br>\n" +
+            "</br><div id=\"p1_container\"><div id=\"p1\" class='playerinfo'></div></div></br>\n" +
+            "<div id=\"p2_container\"><div id=\"p2\" class='playerinfo'></div></div></br>\n" +
+            "<div id=\"p3_container\"><div id=\"p3\" class='playerinfo'></div></div></br>\n" +
+            "<div id=\"p4_container\"><div id=\"p4\"  class='playerinfo'></div></div></br>\n" +
             "</div>\n" +
             "<div id=\"map_info\" class='map'>\n" +
-            "<button style='margin-left: 45%;margin-top: 30%;' onclick=\"App.startGame()\">START</button>\n" +
+            "<button class='center_bn' onclick=\"App.clickStart()\">START</button>\n" +
             "</div>\n" +
             "</div>\n" +
             "</br></br></br>\n" +
@@ -111,12 +109,14 @@ const App = {
             "</p>"
         document.getElementById('roomid').innerHTML = roomId;
         await this.updatePlayerInfo();
+        myTurn = await this.monopoly.methods.getMyTurn(roomId).call();
+        console.log(myTurn);
+        document.getElementById('p' + myTurn).outerHTML = "<div id=\"p" + myTurn + "\" class='myplayerinfo'>" +
+            document.getElementById('p' + myTurn).innerHTML + "</div>"
     },
 
     updatePlayerInfo: async function () {
         console.log('Updating player information of room: ' + roomId)
-        // let p_num = await this.monopoly.methods.getPNum(roomId).call();
-        // console.log(p_num);
         let p_state = await this.monopoly.methods.getRoomInfo(roomId).call();
         document.getElementById('p1').innerHTML =
             "<div id=\"add1\">" + p_state[0] + "</div>\n" +
@@ -136,21 +136,53 @@ const App = {
             "<div id=\"mny4\">" + p_state[11] + "</div>\n"
     },
 
+    updateGridInfo: async function (grid_id) {
+        
+    },
+
+    clickStart : async function () {
+        await this.monopoly.methods.gameInitial(roomId).send({from: this.account,gas:3000000});
+    },
 
     startGame: async function () {
         let grid_html = "<table style='width: 100%; height: 100%'>";
 
-        for (let i=0;i < 8; i++) {
+        for (let i = 0; i < 8; i++) {
             grid_html += "<tr>"
-            for (let j=0;j < 8; j++) {
-                grid_html += "<td>"+j+"</td>";
+            for (let j = 0; j < 8; j++) {
+                if (i === 0) {
+                    grid_html += "<td id='g" + j + "' class='grid'>" + j +"</td>";
+                    continue;
+                }
+                if (i === 7) {
+                    grid_html += "<td id='g" + (21-j) + "' class='grid'>" + (21-j) + "</td>";
+                    continue;
+                }
+                if (j === 0) {
+                    grid_html += "<td id='g" + (28-i) + "' class='grid'>" + (28-i) + "</td>";
+                    continue;
+                }
+                if (j === 7) {
+                    grid_html += "<td id='g" + (7+i) + "' class='grid'>" + (7+i) + "</td>";
+                    continue;
+                }
+                grid_html += "<td>" + "</td>";
             }
             grid_html += "</tr>\n"
         }
         grid_html += "</table>\n"
         document.getElementById('map_info').innerHTML = grid_html;
-        await this.monopoly.methods.gameInitial(roomId).send({from: this.account});
+        // document.getElementById('roll').innerHTML = "<button onclick=\"App.rollMove()\">ROLL</button>"
         await this.updatePlayerInfo();
+        if (myTurn === '1') {
+            document.getElementById('roll').innerHTML = "<button onclick=\"App.rollMove()\">ROLL</button>"
+        }
+    },
+
+
+
+    rollMove: async function () {
+        document.getElementById('roll').innerHTML = "";
     },
 };
 
