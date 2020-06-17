@@ -187,9 +187,15 @@ contract Monopoly {
         
     }
 
-    function info(uint32 _roomId) public view returns (uint8 ,int32, uint8 ,int32 ){
-          Room memory now_room = rooms[_roomId];
-          return (now_room.players[1].position,now_room.players[1].money,now_room.players[2].position,now_room.players[2].money);
+
+
+    function getGridInfo(uint32 _roomId, uint8 position) public view returns (uint8 ,uint8, int32 ,int32 ){
+          Grid memory _grid = rooms[_roomId].chessboard[position];
+          int32 currentprice = int32(_grid.base_price * (_grid.level+1));
+          int32 tax = int32( _grid.base_price * _grid.level * ( 1 + _grid.up_rate/10 * _grid.level));
+          return (_grid.level,_grid.belong_to,  currentprice,tax);
+          
+
     }
 
     function createRoom(uint32 _roomId) public payable {
