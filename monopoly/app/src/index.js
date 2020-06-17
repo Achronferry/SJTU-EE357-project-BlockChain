@@ -8,7 +8,7 @@ let myTurn = 0
 let RoomStatus = 0 // 0-wait 1-play
 let PlayerStateListener
 let GameStartListener
-
+let OneStepListener
 
 const App = {
     web3: null,
@@ -137,7 +137,21 @@ const App = {
     },
 
     updateGridInfo: async function (grid_id) {
-        
+        let grid_state = await this.monopoly.methods.getGridInfo(roomId, grid_id).call();
+        let update_html = ""
+        if (grid_state[2] !== '0') { // private grid
+            update_html += "<div>level: "+ grid_state[0] +"</div>"
+            if (grid_state[1] !== '0') {
+                update_html += "<div>Owner: " + grid_state[1] + "</div>"
+                update_html += "<div>Tax: " + grid_state[3] + "</div>"
+            }
+            if (grid_state[0] !== '3') {
+                update_html += "<div>Price: " + grid_state[2] + "</div>"
+            }
+        }
+        update_html += "<div style='color: red' id='g"+grid_id+"'></div>"
+        document.getElementById('g' + grid_id).innerHTML = update_html;
+
     },
 
     clickStart : async function () {
@@ -174,12 +188,20 @@ const App = {
         document.getElementById('map_info').innerHTML = grid_html;
         // document.getElementById('roll').innerHTML = "<button onclick=\"App.rollMove()\">ROLL</button>"
         await this.updatePlayerInfo();
+        for (let i=0; i<28; i++) {
+            this.updateGridInfo(i);
+        }
         if (myTurn === '1') {
             document.getElementById('roll').innerHTML = "<button onclick=\"App.rollMove()\">ROLL</button>"
         }
+        RoomStatus = 1;
     },
 
 
+    newStep: async function (turn) {
+
+
+    }
 
     rollMove: async function () {
         document.getElementById('roll').innerHTML = "";
@@ -220,6 +242,11 @@ window.addEventListener("load", async function () {
         })
         .on('error', console.error);
 
-
+    OneStepListener = await App.monopoly.events.OneStep(function (error, event) {
+        console.log(event);
+    })
+        .on('data', function (event) {
+        })
+        .on('error', console.error);
 });
 
