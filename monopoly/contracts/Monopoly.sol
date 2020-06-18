@@ -72,6 +72,7 @@ contract Monopoly {
             rooms[_roomId].players[i].money = 20000;
             rooms[_roomId].players[i].position = 0;  
         }
+        
         rooms[_roomId].playStatus = GameStatus.playing;
         rooms[_roomId].playerTurn = 1;
         emit GameStart();
@@ -96,14 +97,15 @@ contract Monopoly {
         // considerting not BankRupt
         int32 cost = int32(_grid.base_price * (_grid.level+1));
         //buy
-        if (rooms[_roomId].players[_player_turn].money > cost
+        if (rooms[_roomId].players[_player_turn].money >= cost
                 && _grid.level < 3){
+              // buy(_roomId, player_turn, will_buy)
                 emit BuyGrid(_roomId, step, cost, player_turn, position);
         }
         //not buy
         else{   
-               uint8 next_player_turn = changeplayer(_roomId);
-               emit OneStep(_roomId, step, player_turn, next_player_turn);
+              uint8 next_player_turn = changeplayer(_roomId);
+              emit OneStep(_roomId, step, player_turn, next_player_turn);
         }
     }
     //not land
@@ -124,7 +126,7 @@ contract Monopoly {
     //     return false;
     // }
     
-    function PayTax(uint32 _roomId) private{
+    function PayTax(uint32 _roomId) public{
         uint8 _playerTurn = rooms[_roomId].playerTurn;
         uint8 _player_turn = _playerTurn - 1;
         uint8 position =  rooms[_roomId].players[_player_turn].position;
@@ -133,11 +135,15 @@ contract Monopoly {
    
         int32 tax = int32( _grid.base_price * _grid.level * ( 1 + _grid.up_rate/10 * _grid.level));
         _player.money -= tax;
-        uint8 _belong_to = _grid.belong_to-1;
-        rooms[_roomId].players[_belong_to].money += tax;
+        if (_grid.belong_to != 0){
+            uint8 _belong_to = _grid.belong_to-1;
+            rooms[_roomId].players[_belong_to].money += tax;
+            
+        }
+  
     }
     
-    function Is_Bankruptcy(uint32 _roomId) private view returns (bool){
+    function Is_Bankruptcy(uint32 _roomId) public view returns (bool){
         uint8 _playerTurn = rooms[_roomId].playerTurn - 1;
         Player memory _player = rooms[_roomId].players[_playerTurn];
         return ( _player.money < 0);
@@ -164,9 +170,9 @@ contract Monopoly {
         uint8 _player_turn = player_turn-1;
         if (will_buy) {
         uint8 position =  rooms[_roomId].players[_player_turn].position;
-        Grid memory _grid = rooms[_roomId].chessboard[position];
+        Grid storage _grid = rooms[_roomId].chessboard[position];
         int32 money2pay = int32(_grid.base_price * (_grid.level+1));
-         if ( _grid.belong_to == player_turn){
+         if ( _grid.belong_to == player_turn ||  _grid.belong_to == 0){
              rooms[_roomId].players[_player_turn].money -= money2pay;
  
          }
@@ -188,7 +194,7 @@ contract Monopoly {
 
     }
 
-    function changeplayer(uint32 _roomId) private returns (uint8){
+    function changeplayer(uint32 _roomId) public returns (uint8){
         uint8  _playerTurn = rooms[_roomId].playerTurn;
         uint8 _next_playerTurn = 0;
         while( _next_playerTurn != _playerTurn){
