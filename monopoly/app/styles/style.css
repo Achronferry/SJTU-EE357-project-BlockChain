@@ -60,7 +60,7 @@ input {
   width: 748px;
   height: 100%;
   overflow: hidden;
-  /*background-image: image("styles/map.jpg");*/
+  background: url("map.png");
   float: right;
 }
 

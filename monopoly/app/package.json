@@ -15,8 +15,10 @@
     "webpack-dev-server": "^3.11.0"
   },
   "dependencies": {
+    "file-loader": "^6.0.0",
     "style-loader": "^1.2.1",
     "truffle-contract": "^4.0.31",
+    "url-loader": "^4.1.0",
     "web": "0.0.2",
     "web3": "^1.2.9"
   },

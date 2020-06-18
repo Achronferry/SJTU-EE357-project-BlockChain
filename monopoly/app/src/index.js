@@ -1,4 +1,5 @@
 import '../styles/style.css';
+import '../styles/map.png';
 
 import Web3 from "web3";
 import monopolyArtifact from "../../build/contracts/Monopoly.json";
