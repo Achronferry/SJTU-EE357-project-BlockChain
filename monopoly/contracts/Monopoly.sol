@@ -31,6 +31,7 @@ contract Monopoly {
         GameStatus playStatus;
         Grid[boardSize] chessboard;
         uint8 player_num;
+        uint8 living_num;
         uint8 winner;
     }
     //room number
@@ -40,11 +41,10 @@ contract Monopoly {
 
     event OneStep(uint32 roomId, uint8 step, uint8 thisTurn, uint8 nextTurn);
     event GameStart();
-    event GameOver(uint8 winner);
     event PlayerChange();
     event BuyGrid(uint32 roomId, uint8 step, int32 cost, uint8 thisTurn,uint8 grid_pos);
     event BuyInfo(uint32 roomId, int32 cost, uint8 player_turn, uint8 grid_pos);
-    event BankRupt(uint32 roomId, uint8 player_turn,address add , int32 money, uint8 player_num);
+    event BankRupt(uint32 roomId, uint8 player_turn,address add , uint8 step, uint8 nextTurn, uint8 left_player_num);
 
 
      function random() public returns (uint) {
@@ -75,6 +75,7 @@ contract Monopoly {
         
         rooms[_roomId].playStatus = GameStatus.playing;
         rooms[_roomId].playerTurn = 1;
+        rooms[_roomId].living_num = rooms[_roomId].player_num;
         emit GameStart();
     }
     
@@ -92,12 +93,15 @@ contract Monopoly {
     Grid storage _grid = rooms[_roomId].chessboard[position];
     if (rooms[_roomId].chessboard[position].grid_type == 1 ){
             PayTax(_roomId);
-            if (Is_Bankruptcy(_roomId))
-                goBankrupt(_roomId, player_turn);
+            if (Is_Bankruptcy(_roomId)) {
+                uint8 next_player_turn = changeplayer(_roomId);
+                goBankrupt(_roomId, player_turn, step, next_player_turn);
+                return;
+            }
         // considerting not BankRupt
         int32 cost = int32(_grid.base_price * (_grid.level+1));
         //buy
-        if (rooms[_roomId].players[_player_turn].money >= cost
+        if (rooms[_roomId].players[_player_turn].money > cost
                 && _grid.level < 3){
               // buy(_roomId, player_turn, will_buy)
                 emit BuyGrid(_roomId, step, cost, player_turn, position);
@@ -126,15 +130,14 @@ contract Monopoly {
     //     return false;
     // }
     
-    function PayTax(uint32 _roomId) public{
+    function PayTax(uint32 _roomId) private{
         uint8 _playerTurn = rooms[_roomId].playerTurn;
         uint8 _player_turn = _playerTurn - 1;
         uint8 position =  rooms[_roomId].players[_player_turn].position;
-        Grid storage _grid = rooms[_roomId].chessboard[position];
-        Player storage _player = rooms[_roomId].players[_player_turn];
-   
+        Grid memory _grid = rooms[_roomId].chessboard[position];
+ 
         int32 tax = int32( _grid.base_price * _grid.level * ( 1 + _grid.up_rate/10 * _grid.level));
-        _player.money -= tax;
+        rooms[_roomId].players[_player_turn].money -= tax;
         if (_grid.belong_to != 0){
             uint8 _belong_to = _grid.belong_to-1;
             rooms[_roomId].players[_belong_to].money += tax;
@@ -143,22 +146,23 @@ contract Monopoly {
   
     }
     
-    function Is_Bankruptcy(uint32 _roomId) public view returns (bool){
+    function Is_Bankruptcy(uint32 _roomId) private view returns (bool){
         uint8 _playerTurn = rooms[_roomId].playerTurn - 1;
         Player memory _player = rooms[_roomId].players[_playerTurn];
-        return ( _player.money < 0);
+        return ( _player.money <= 0);
     }
     
-    function goBankrupt(uint32 _roomId, uint8 player_turn) public{
+    function goBankrupt(uint32 _roomId, uint8 player_turn, uint8 step, uint8 next_player_turn) private{
 	// all grid belong to this player iturns free;
 	  for (uint i = 0; i < boardSize; ++i) {
 	        if (rooms[_roomId].chessboard[i].belong_to == player_turn){
 	             rooms[_roomId].chessboard[i].belong_to = 0;
 	             rooms[_roomId].chessboard[i].level = 0;
 	        }
-    }
+         }
+         rooms[_roomId].living_num -- ;
          uint8 _player_turn = player_turn - 1;
-	 emit BankRupt(_roomId, player_turn, rooms[_roomId].players[_player_turn].id, rooms[_roomId].players[_player_turn].money, rooms[_roomId].player_num);
+	 emit BankRupt(_roomId, player_turn, rooms[_roomId].players[_player_turn].id, step, next_player_turn, rooms[_roomId].living_num);
 }
 
     //先判断是不是自己的, 能不能买 先不判断了
@@ -177,7 +181,6 @@ contract Monopoly {
  
          }
          else{
-             money2pay = money2pay * 2;
              rooms[_roomId].players[_player_turn].money -= money2pay;
              uint8 _belong_to = _grid.belong_to-1;
              rooms[_roomId].players[_belong_to].money += money2pay;
@@ -194,7 +197,7 @@ contract Monopoly {
 
     }
 
-    function changeplayer(uint32 _roomId) public returns (uint8){
+    function changeplayer(uint32 _roomId) private returns (uint8){
         uint8  _playerTurn = rooms[_roomId].playerTurn;
         uint8 _next_playerTurn = 0;
         while( _next_playerTurn != _playerTurn){
@@ -205,13 +208,10 @@ contract Monopoly {
                 
             rooms[_roomId].playerTurn = _next_playerTurn;
             if  (!Is_Bankruptcy(_roomId)  ) 
-                    return rooms[_roomId].playerTurn;
-        
-            
+                    return rooms[_roomId].playerTurn;        
         }
-        emit GameOver(_playerTurn);
+        return rooms[_roomId].playerTurn;
         
-
     }
 
 

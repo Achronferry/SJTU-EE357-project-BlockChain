@@ -42,7 +42,8 @@ input {
   word-wrap:break-word;
   word-break: break-all;
   overflow: hidden;
-  background-color: cornflowerblue;
+  background-color: lightblue;
+  border-radius: 0.5em;
 }
 
 .myplayerinfo {
@@ -50,21 +51,26 @@ input {
   word-wrap:break-word;
   word-break: break-all;
   overflow: hidden;
-  background-color: limegreen;
+  background-color: lightgreen;
+  border-radius: 0.5em;
+
 }
 
 .map {
   width: 748px;
   height: 100%;
   overflow: hidden;
+  /*background-image: image("styles/map.jpg");*/
   float: right;
 }
 
 .grid {
   border: 1px solid black;
   border-collapse: collapse;
-  background-color: lightgray;
+  background-color: white;
+  opacity: 0.7;
   font-size: 10px;
+  border-radius: 2em;
 }
 
 .center_bn {

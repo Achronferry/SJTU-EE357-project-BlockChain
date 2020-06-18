@@ -1,4 +1,4 @@
-import '../styles/style.css'
+import '../styles/style.css';
 
 import Web3 from "web3";
 import monopolyArtifact from "../../build/contracts/Monopoly.json";
@@ -11,6 +11,7 @@ let GameStartListener
 let OneStepListener
 let BuyGridListener
 let BuyInfoListener
+let BankRuptListener
 
 const App = {
     web3: null,
@@ -151,7 +152,7 @@ const App = {
                 update_html += "<div>Price: " + grid_state[2] + "</div>"
             }
         }
-        update_html += "<div style='color: red' id='g" + grid_id + "'></div>"
+        update_html += "<div style='color: red' id='g" + grid_id + "'></div>";
         document.getElementById('g' + grid_id).innerHTML = update_html;
 
     },
@@ -201,7 +202,7 @@ const App = {
 
     rollMove: async function () {
         document.getElementById('roll').innerHTML = "";
-        await this.monopoly.methods.move(roomId,myTurn).send({from: this.account});
+        await this.monopoly.methods.move(roomId,myTurn).send({from: this.account, gas: 3000000});
 
     },
 
@@ -277,16 +278,45 @@ window.addEventListener("load", async function () {
         .on('error', console.error);
 
 
-    BuyInfoListener = App.monopoly.events.OneStep(function (error, event) {
+    BuyInfoListener = App.monopoly.events.BuyInfo(function (error, event) {
         console.log(event);
     })
         .on('data', function (event) {
             let re = event.returnValues;
-            App.setStatus("Player " + re.player_turn + "has bought Grid " +
+            App.setStatus("Player " + re.player_turn + " has bought Grid " +
                 re.grid_pos + " within " + re.cost + " RMB!")
             App.updatePlayerInfo();
             App.updateGridInfo(re.grid_pos);
         })
         .on('error', console.error);
+
+    BankRuptListener = App.monopoly.events.BankRupt(function (error, event) {
+        console.log(event);
+    })
+        .on('data', async function (event) {
+            let re = event.returnValues;
+            if (re.player_turn === myTurn){
+                confirm("You have been bankrupt! Current living player number: " + re.left_player_num);
+                RoomStatus = 0
+            }
+            App.setStatus("Player " + re.player_turn + " has go bankrupt! Current living player number: " + re.left_player_num);
+            if (re.left_player_num === '1') { //game end
+                if (re.nextTurn === myTurn) {
+                    confirm("Congratulations! You are the final winner!");
+                }
+                window.location.reload();
+            }
+            else {
+                App.updatePlayerInfo();
+                for (let i=0; i< 28 ;i++) {
+                    App.updateGridInfo(i);
+                }
+                if (re.nextTurn === myTurn) {
+                    document.getElementById('roll').innerHTML = "<button onclick=\"App.rollMove()\">ROLL</button>"
+                }
+            }
+        })
+        .on('error', console.error);
+
 });
 
