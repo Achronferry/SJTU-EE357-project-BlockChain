@@ -1,0 +1,147 @@
+\documentclass[12pt]{report}
+\usepackage[UTF8]{ctex}
+\usepackage[a4paper]{geometry}
+\usepackage[myheadings]{fullpage}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{graphicx, wrapfig, subcaption, setspace, booktabs}
+\usepackage[T1]{fontenc}
+\usepackage[font=small, labelfont=bf]{caption}
+\usepackage{fourier}
+\usepackage[protrusion=true, expansion=true]{microtype}
+\usepackage[english]{babel}
+\usepackage{sectsty}
+\usepackage[colorlinks,linkcolor=black,urlcolor=blue]{hyperref}
+\usepackage{graphicx}
+
+\usepackage{ulem}
+
+\usepackage{xcolor}
+\usepackage{listings}
+
+\usepackage{setspace}
+\usepackage{indentfirst}
+\setlength{\parindent}{2em}
+
+
+\newcommand{\HRule}[1]{\rule{\linewidth}{#1}}
+\renewcommand\thesection{\arabic{section}}
+\setcounter{tocdepth}{5}
+\setcounter{secnumdepth}{5}
+
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{ %
+  language=Java,                % the language of the code
+  basicstyle=\footnotesize,           % the size of the fonts that are used for the code
+  numbers=left,                   % where to put the line-numbers
+  numberstyle=\tiny\color{gray},  % the style that is used for the line-numbers
+  stepnumber=2,                   % the step between two line-numbers. If it's 1, each line 
+                                  % will be numbered
+  numbersep=5pt,                  % how far the line-numbers are from the code
+  backgroundcolor=\color{white},      % choose the background color. You must add \usepackage{color}
+  showspaces=false,               % show spaces adding particular underscores
+  showstringspaces=false,         % underline spaces within strings
+  showtabs=false,                 % show tabs within strings adding particular underscores
+  frame=single,                   % adds a frame around the code
+  rulecolor=\color{black},        % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. commens (green here))
+  tabsize=2,                      % sets default tabsize to 2 spaces
+  captionpos=b,                   % sets the caption-position to bottom
+  breaklines=true,                % sets automatic line breaking
+  breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+  title=\lstname,                   % show the filename of files included with \lstinputlisting;
+                                  % also try caption instead of title
+  keywordstyle=\color{blue},          % keyword style
+  commentstyle=\color{dkgreen},       % comment style
+  stringstyle=\color{mauve},         % string literal style
+  escapeinside={\%*}{*)},            % if you want to add LaTeX within your code
+  morekeywords={*,...}               % if you want to add more keywords to the set
+}
+
+
+%-------------------------------------------------------------------------------
+% HEADER & FOOTER
+%-------------------------------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\setlength\headheight{15pt}
+\fancyfoot[R]{Page \thepage\ of \pageref{LastPage}}
+%-------------------------------------------------------------------------------
+% TITLE PAGE
+%-------------------------------------------------------------------------------
+
+\begin{document}
+
+\title{ \normalsize \textsc{Report}
+        \\ [2.0cm]
+        \HRule{0.5pt} \\
+        \LARGE \textbf{\uppercase{基于智能合约的分布式大富翁游戏}}
+        \HRule{2pt} \\ [0.5cm]
+        \normalsize \today \vspace*{5\baselineskip}}
+
+\date{}
+
+\author{
+        姓名: 杨晨宇、蓝宇霆 \\
+        学号: 517030910386、517030910368 }
+
+
+\maketitle
+\tableofcontents
+\newpage
+
+\sectionfont{\scshape}
+%-------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+% BODY
+%-------------------------------------------------------------------------------
+
+\section{项目介绍}
+\subsection{背景}
+\subsection{相关工作}
+在实现该项目的过程中，我们主要参考了Truffle官方文档\cite{1}和Web3.js官方文档\cite{2}。此外，由于编写合约的Solidity及与合约的交互过程对我们而言都较为陌生，因此我们也阅读了许多开源项目的源代码，其中包括官方样例Pet-Shop\cite{3}以及非常有名的入门项目僵尸工厂\cite{4}等等。虽然这些项目都与我们要做的大富翁有一定区别，但通过它们我们对于智能合约的应用有了更深刻的了解。
+
+此外，我们还参考了github上一个利用智能合约实现五子棋的项目\cite{5}。该项目与我们的目的较为接近——事实上，我们的房间创建/加入的想法就脱胎于此，并在其基础上从双人扩展到多人。但该项目版本过于古老，且游戏机制远不如大富翁复杂，因此也只是作为参考，并未用于实际实现中。
+
+我们的主体框架是在官方样例webpack-box\cite{6}的基础上搭建的。该项目原本仅用来展示虚拟货币的支付过程。我们采用了它的目录结构，而其他部分，包括前端设计，页面交互，事件广播及合约逻辑最终全都由我们自己实现。
+
+\section{项目环境}
+truffle web3.js webpack solidity WebStorm IDE Remix IDE
+\section{项目实现}
+\subsection{合约实现}
+\subsubsection{数据结构}
+\subsubsection{合约事件}
+\subsubsection{主要函数}
+\begin{lstlisting}
+function createRoom(uint32 _roomId) public payable ;
+\end{lstlisting}
+\subsection{前端交互}
+。。。。
+在创建房间/加入房间以后，根据当前房间人数，玩家会被分配一个座位号。考虑到实际测试是在私链上进行，我们利用房间号+座位号的方式唯一确定一名玩家的身份，并利用他的地址作为验证。
+\section{项目难点}
+
+\section{后续工作}
+\section{分工细节}
+\section{参考资料}
+\begin{enumerate}
+	\bibitem{1} Truffle官网 \url{https://www.trufflesuite.com/docs}
+	\bibitem{2}	Web3.js官网 \url{https://web3js.readthedocs.io/en/v1.2.9/}
+	\bibitem{3} 官方样例Pet-Shop \url{https://github.com/truffle-box/pet-shop-box}
+	\bibitem{4} 僵尸工厂 \url{https://cryptozombies.io/en/course}
+	\bibitem{5} 利用智能合约实现五子棋对战 \url{https://github.com/Alexygui/Gobang}
+	\bibitem{6} WebPack \url{https://github.com/truffle-box/webpack-box}
+\end{enumerate}
+
+
+
+
+\section{完整代码}
+\noindent\url{https://github.com/Achronferry/SJTU-EE357-project-BlockChain}
+
+
+\end{document}
+
