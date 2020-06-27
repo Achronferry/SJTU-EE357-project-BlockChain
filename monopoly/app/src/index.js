@@ -123,19 +123,19 @@ const App = {
         console.log('Updating player information of room: ' + roomId)
         let p_state = await this.monopoly.methods.getRoomInfo(roomId).call();
         document.getElementById('p1').innerHTML =
-            "<div id=\"add1\">" + p_state[0] + "</div>\n" +
+            "<div id=\"add1\">" + "Player 1" + "</div>\n" +
             "<div id=\"pos1\">" + p_state[1] + "</div>\n" +
             "<div id=\"mny1\">" + p_state[2] + "</div>\n"
         document.getElementById('p2').innerHTML =
-            "<div id=\"add2\">" + p_state[3] + "</div>\n" +
+            "<div id=\"add2\">" + "Player 2" + "</div>\n" +
             "<div id=\"pos2\">" + p_state[4] + "</div>\n" +
             "<div id=\"mny2\">" + p_state[5] + "</div>\n"
         document.getElementById('p3').innerHTML =
-            "<div id=\"add3\">" + p_state[6] + "</div>\n" +
+            "<div id=\"add3\">" + "Player 3" + "</div>\n" +
             "<div id=\"pos3\">" + p_state[7] + "</div>\n" +
             "<div id=\"mny3\">" + p_state[8] + "</div>\n"
         document.getElementById('p4').innerHTML =
-            "<div id=\"add4\">" + p_state[9] + "</div>\n" +
+            "<div id=\"add4\">" + "Player 4" + "</div>\n" +
             "<div id=\"pos4\">" + p_state[10] + "</div>\n" +
             "<div id=\"mny4\">" + p_state[11] + "</div>\n"
     },
